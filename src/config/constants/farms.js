@@ -77,7 +77,16 @@ const farms = [
   },
   {
     pid: 9,
-    lpSymbol: 'PINE-pUSDC',
+    lpSymbol: 'PINE-eHEX',
+    lpAddress: '0x145FA4465e2ddC20cdE2a3ca6071Ecbcb1144624',
+    token: tokens.ehex,
+    quoteToken: tokens.pine,
+    version: '2',
+    farmActive: true
+  },
+    {
+    pid: 10,
+    lpSymbol: 'PINE-USDC',
     lpAddress: '0xaeedbefaf43165556f595ada0c7bf181e535bd0d',
     token: tokens.usdc,
     quoteToken: tokens.pine,
