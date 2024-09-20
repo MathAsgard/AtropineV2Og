@@ -73,7 +73,7 @@ const AtropineFarmCard = ({objectToFilter, active, search, stakedOnly, index, dr
 	async function getStats() {
 
 		const query = '0x0E4B3d3141608Ebc730EE225666Fd97c833d553E' + ',' + farm.lpAddress; 
-		const response = await fetch(https://api.dexscreener.com/latest/dex/pairs/pulsechain/${query});
+		const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/pulsechain/${query}`);
 		const rsps = await response.json();
 		
 		const pinePrice = rsps.pairs.filter((pair)=>pair.pairAddress === '0x0E4B3d3141608Ebc730EE225666Fd97c833d553E')[0].priceUsd
