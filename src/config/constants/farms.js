@@ -83,6 +83,15 @@ const farms = [
     quoteToken: tokens.pine,
     version: '2',
     farmActive: true
+  },
+  {
+    pid: 10,
+    lpSymbol: 'PINE-pUSDC',
+    lpAddress: '0xaeedbefaf43165556f595ada0c7bf181e535bd0d',
+    token: tokens.ehex,
+    quoteToken: tokens.pine,
+    version: '2',
+    farmActive: true
   }
 ]
 
