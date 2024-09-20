@@ -71,123 +71,144 @@ const AtropineFarmCard = ({objectToFilter, active, search, stakedOnly, index, dr
 	}
 
 	async function getStats() {
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const cacheKey = `stats_${farm.lpAddress}`;
+    const cacheTTL = 60000; // Cache for 1 minute
+    const cachedData = localStorage.getItem(cacheKey);
 
-		const query = '0x0E4B3d3141608Ebc730EE225666Fd97c833d553E' + ',' + farm.lpAddress; 
-		const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/pulsechain/${query}`);
-		const rsps = await response.json();
-		
-		const pinePrice = rsps.pairs.filter((pair)=>pair.pairAddress === '0x0E4B3d3141608Ebc730EE225666Fd97c833d553E')[0].priceUsd
-		const pairData = rsps.pairs.filter((pair)=>pair.pairAddress === farm.lpAddress)[0]
+    // Check for cached data first
+    if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < cacheTTL) {
+            console.log("Using cached data");
+            useCachedData(data); // Use cached data if available
+            return;
+        }
+    }
 
-		const [poolInfo, allowance, pendingAtropine, lpSupply, masterchefLpBalance, userLpBalance, userStakedLp, totalAllocPoint, pinePerBlock, pairPineBalance] = await multicall({
-			contracts: [
-				{
-					...contracts.masterChef,
-					functionName: 'poolInfo',
-					args: [farm.pid]
-				},
-				{
-					address: farm.lpAddress,
-					abi: lpABI,
-					functionName: 'allowance',
-					args: [userAccount.address, contracts.masterChef.address]
-				},
-				{
-					...contracts.masterChef,
-					functionName: 'pendingPine',
-					args: [farm.pid, userAccount.address]
-				},
-				{
-					address: farm.lpAddress,
-					abi: lpABI,
-					functionName: 'totalSupply',
-				},
-				{
-					address: farm.lpAddress,
-					abi: lpABI,
-					functionName: 'balanceOf',
-					args: [contracts.masterChef.address]
-				},
-				{
-					address: farm.lpAddress,
-					abi: lpABI,
-					functionName: 'balanceOf',
-					args: [userAccount.address]
-				},
-				{
-					...contracts.masterChef,
-					functionName: 'userInfo',
-					args: [farm.pid, userAccount.address]
-				},
-				{
-					...contracts.masterChef,
-					functionName: 'totalAllocPoint',
-				},
-				{
-					...contracts.masterChef,
-					functionName: 'PinePerBlock',
-				},
-				{
-					...contracts.pineToken,
-					functionName: 'balanceOf',
-					args: [farm.lpAddress]
-				},
-			],
-		});
-		let _lpPrice;
-		if(pairData.liquidity){
-			_lpPrice = Number(pairData.liquidity.usd) / (Number(lpSupply.result) / 1e18)
-		} else {
-			_lpPrice =  ( (Number(pairPineBalance.result)/1e18) * pinePrice * 2) / (Number(lpSupply.result) / 1e18)
-		}
-		
+    // Add delay before making a new API request
+    await delay(3000); // 3-second delay
 
-		const _poolWeight = Number(poolInfo.result[1]) / Number(totalAllocPoint.result)
+    const query = '0x0E4B3d3141608Ebc730EE225666Fd97c833d553E' + ',' + farm.lpAddress;
+    const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/pulsechain/${query}`);
+    const rsps = await response.json();
 
-		const _farmFees = Number(poolInfo.result[4]) > 0 ? Number(poolInfo.result[4])/10000 + '% fees' : 'No Fees';
-		setFarmFees(_farmFees);
-		const _multiplier = Number(poolInfo.result[1]) / 10 + 'x';
-		setMultiplier(_multiplier);
+    // Cache the new response
+    localStorage.setItem(cacheKey, JSON.stringify({ data: rsps, timestamp: Date.now() }));
 
-		const _pendingPine = Number(Number(pendingAtropine.result ? pendingAtropine.result : 0) / 1e18).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3});
-		setPendingPine(_pendingPine);
-		const _pendingPineUSD = Number(Number(pendingAtropine.result ? pendingAtropine.result : 0) / 1e18 * pinePrice).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3});
-		setPendingPineUSD(_pendingPineUSD);
-		const _totalLiquidity = Number(_lpPrice * (Number(masterchefLpBalance.result)/1e18)).toLocaleString(undefined, {maximumFractionDigits: 0});
-		setTotalLiquidity(_totalLiquidity);
-		const _stakedLpBalance = new BigNumber(userStakedLp.result ? userStakedLp.result[0] : 0).div(1e18)
-		setStakedLpBalance(_stakedLpBalance);		
-		const _staking = Number(Number(userStakedLp.result ? userStakedLp.result[0] : 0) / 1e18) > 0
-		setStaking(_staking)
-		const _stakedLpBalanceUSD = Number(Number(userStakedLp.result ? userStakedLp.result[0] : 0) / 1e18 * _lpPrice).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3});
-		setStakedLpBalanceUSD(_stakedLpBalanceUSD);
-		const _farmAPR = Number(getFarmApy(_poolWeight, pinePrice, Number(_lpPrice * (Number(masterchefLpBalance.result)/1e18)), Number(pinePerBlock.result)/1e18)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-		setFarmAPR(_farmAPR);
-		const _lpBalance = new BigNumber(userLpBalance.result ? userLpBalance.result : 0).div(1e18)
-		setLpBalance(_lpBalance);
+    const pinePrice = rsps.pairs.filter((pair) => pair.pairAddress === '0x0E4B3d3141608Ebc730EE225666Fd97c833d553E')[0].priceUsd;
+    const pairData = rsps.pairs.filter((pair) => pair.pairAddress === farm.lpAddress)[0];
 
-		const _approved = Number(allowance.result) > _lpBalance.mul(1e18);
-		setApproved(_approved);
-		
-		objectToFilter(farm.lpAddress, {
-			pendingPine: Number(pendingAtropine.result) / 1e18,
-			totalLiquidity: _lpPrice * (Number(masterchefLpBalance.result)/1e18),
-			farmAPR: getFarmApy(_poolWeight, pinePrice, Number(_lpPrice * (Number(masterchefLpBalance.result)/1e18)), Number(pinePerBlock.result)/1e18)
-		})
-		console.log(farm.lpSymbol, _lpPrice)
-		const _apr = Number(getFarmApy(_poolWeight, pinePrice, Number(_lpPrice * (Number(masterchefLpBalance.result)/1e18)), Number(pinePerBlock.result)/1e18)) 
-		const _pineEarnedPerThousand1D = calculatePineEarnedPerThousandDollars( 1, _apr, pinePrice )
-		setPineEarnedPerThousand1D(_pineEarnedPerThousand1D)
-		const _pineEarnedPerThousand7D = calculatePineEarnedPerThousandDollars(  7, _apr, pinePrice )
-		setPineEarnedPerThousand7D(_pineEarnedPerThousand7D)
-		const _pineEarnedPerThousand30D = calculatePineEarnedPerThousandDollars( 30, _apr, pinePrice )
-		setPineEarnedPerThousand30D(_pineEarnedPerThousand30D)
-		const _pineEarnedPerThousand365D = calculatePineEarnedPerThousandDollars( 365, _apr, pinePrice )
-		setPineEarnedPerThousand365D(_pineEarnedPerThousand365D)
+    // Continue with your existing logic...
+    const [poolInfo, allowance, pendingAtropine, lpSupply, masterchefLpBalance, userLpBalance, userStakedLp, totalAllocPoint, pinePerBlock, pairPineBalance] = await multicall({
+        contracts: [
+            {
+                ...contracts.masterChef,
+                functionName: 'poolInfo',
+                args: [farm.pid]
+            },
+            {
+                address: farm.lpAddress,
+                abi: lpABI,
+                functionName: 'allowance',
+                args: [userAccount.address, contracts.masterChef.address]
+            },
+            {
+                ...contracts.masterChef,
+                functionName: 'pendingPine',
+                args: [farm.pid, userAccount.address]
+            },
+            {
+                address: farm.lpAddress,
+                abi: lpABI,
+                functionName: 'totalSupply',
+            },
+            {
+                address: farm.lpAddress,
+                abi: lpABI,
+                functionName: 'balanceOf',
+                args: [contracts.masterChef.address]
+            },
+            {
+                address: farm.lpAddress,
+                abi: lpABI,
+                functionName: 'balanceOf',
+                args: [userAccount.address]
+            },
+            {
+                ...contracts.masterChef,
+                functionName: 'userInfo',
+                args: [farm.pid, userAccount.address]
+            },
+            {
+                ...contracts.masterChef,
+                functionName: 'totalAllocPoint',
+            },
+            {
+                ...contracts.masterChef,
+                functionName: 'PinePerBlock',
+            },
+            {
+                ...contracts.pineToken,
+                functionName: 'balanceOf',
+                args: [farm.lpAddress]
+            },
+        ],
+    });
 
-		const _oneThousandDollarsWorthOfPine = 1000 / pinePrice
-		setOneThousandDollarsWorthOfPine(_oneThousandDollarsWorthOfPine)
-	}
+    let _lpPrice;
+    if (pairData.liquidity) {
+        _lpPrice = Number(pairData.liquidity.usd) / (Number(lpSupply.result) / 1e18);
+    } else {
+        _lpPrice = ((Number(pairPineBalance.result) / 1e18) * pinePrice * 2) / (Number(lpSupply.result) / 1e18);
+    }
+
+    const _poolWeight = Number(poolInfo.result[1]) / Number(totalAllocPoint.result);
+
+    const _farmFees = Number(poolInfo.result[4]) > 0 ? Number(poolInfo.result[4]) / 10000 + '% fees' : 'No Fees';
+    setFarmFees(_farmFees);
+    const _multiplier = Number(poolInfo.result[1]) / 10 + 'x';
+    setMultiplier(_multiplier);
+
+    const _pendingPine = Number(Number(pendingAtropine.result ? pendingAtropine.result : 0) / 1e18).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+    setPendingPine(_pendingPine);
+    const _pendingPineUSD = Number(Number(pendingAtropine.result ? pendingAtropine.result : 0) / 1e18 * pinePrice).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+    setPendingPineUSD(_pendingPineUSD);
+    const _totalLiquidity = Number(_lpPrice * (Number(masterchefLpBalance.result) / 1e18)).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    setTotalLiquidity(_totalLiquidity);
+    const _stakedLpBalance = new BigNumber(userStakedLp.result ? userStakedLp.result[0] : 0).div(1e18);
+    setStakedLpBalance(_stakedLpBalance);
+    const _staking = Number(Number(userStakedLp.result ? userStakedLp.result[0] : 0) / 1e18) > 0;
+    setStaking(_staking);
+    const _stakedLpBalanceUSD = Number(Number(userStakedLp.result ? userStakedLp.result[0] : 0) / 1e18 * _lpPrice).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+    setStakedLpBalanceUSD(_stakedLpBalanceUSD);
+    const _farmAPR = Number(getFarmApy(_poolWeight, pinePrice, Number(_lpPrice * (Number(masterchefLpBalance.result) / 1e18)), Number(pinePerBlock.result) / 1e18)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    setFarmAPR(_farmAPR);
+    const _lpBalance = new BigNumber(userLpBalance.result ? userLpBalance.result : 0).div(1e18);
+    setLpBalance(_lpBalance);
+
+    const _approved = Number(allowance.result) > _lpBalance.mul(1e18);
+    setApproved(_approved);
+
+    objectToFilter(farm.lpAddress, {
+        pendingPine: Number(pendingAtropine.result) / 1e18,
+        totalLiquidity: _lpPrice * (Number(masterchefLpBalance.result) / 1e18),
+        farmAPR: getFarmApy(_poolWeight, pinePrice, Number(_lpPrice * (Number(masterchefLpBalance.result) / 1e18)), Number(pinePerBlock.result) / 1e18)
+    });
+    console.log(farm.lpSymbol, _lpPrice);
+    const _apr = Number(getFarmApy(_poolWeight, pinePrice, Number(_lpPrice * (Number(masterchefLpBalance.result) / 1e18)), Number(pinePerBlock.result) / 1e18));
+    const _pineEarnedPerThousand1D = calculatePineEarnedPerThousandDollars(1, _apr, pinePrice);
+    setPineEarnedPerThousand1D(_pineEarnedPerThousand1D);
+    const _pineEarnedPerThousand7D = calculatePineEarnedPerThousandDollars(7, _apr, pinePrice);
+    setPineEarnedPerThousand7D(_pineEarnedPerThousand7D);
+    const _pineEarnedPerThousand30D = calculatePineEarnedPerThousandDollars(30, _apr, pinePrice);
+    setPineEarnedPerThousand30D(_pineEarnedPerThousand30D);
+    const _pineEarnedPerThousand365D = calculatePineEarnedPerThousandDollars(365, _apr, pinePrice);
+    setPineEarnedPerThousand365D(_pineEarnedPerThousand365D);
+
+    const _oneThousandDollarsWorthOfPine = 1000 / pinePrice;
+    setOneThousandDollarsWorthOfPine(_oneThousandDollarsWorthOfPine);
+}
 
 	useEffect(() => {
 		getStats();
