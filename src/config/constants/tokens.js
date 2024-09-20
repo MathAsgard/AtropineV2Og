@@ -99,16 +99,6 @@ const tokens = {
     address: '0xaA2C47a35C1298795B5271490971Ec4874C8e53d',
     decimals: 18,
   },
-  eusdc: {
-    symbol: 'eUSDC',
-    address: '0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07',
-    decimals: 18,
-  },
-  eusdt: {
-    symbol: 'eUSDT',
-    address: '0x0Cb6F5a34ad42ec934882A05265A7d5F59b51A2f',
-    decimals: 18,
-  },
   hex: {
     symbol: 'HEX',
     address: '0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39',
@@ -135,7 +125,7 @@ const tokens = {
     decimals: 18,
   },
   usdc: {
-    symbol: 'usdc',
+    symbol: 'pUSDC',
     address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     decimals: 18,
   },
