@@ -88,7 +88,7 @@ const farms = [
     pid: 10,
     lpSymbol: 'PINE-pUSDC',
     lpAddress: '0xaeedbefaf43165556f595ada0c7bf181e535bd0d',
-    token: tokens.pusdc,
+    token: tokens.usdc,
     quoteToken: tokens.pine,
     version: '2',
     farmActive: true
