@@ -129,7 +129,7 @@ const tokens = {
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     decimals: 18,
   },
-    usdc: {
+    usdt: {
     symbol: "pUSDT",
     address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     decimals: 18,
@@ -137,6 +137,11 @@ const tokens = {
     weth: {
     symbol: "pWETH",
     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    decimals: 18,
+  },
+    bear: {
+    symbol: "bear",
+    address: "0xd6c31bA0754C4383A41c0e9DF042C62b5e918f6d",
     decimals: 18,
   },
     down: {
@@ -152,16 +157,6 @@ const tokens = {
     stable: {
     symbol: "STABLE-LP",
     address: "0xC607606C0DC9B084D4e4458449963a975a762093",
-    decimals: 18,
-  },
-    stable: {
-    symbol: "STABLE-LP",
-    address: "0xC607606C0DC9B084D4e4458449963a975a762093",
-    decimals: 18,
-  },
-    bear: {
-    symbol: "BEAR",
-    address: "0xd6c31bA0754C4383A41c0e9DF042C62b5e918f6d",
     decimals: 18,
   },
 };
