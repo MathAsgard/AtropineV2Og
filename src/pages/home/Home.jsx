@@ -73,13 +73,13 @@ const Home = () => {
 
     const data = await multicall({ contracts: calls });
 
-    const _pinePrice = rsps.pairs.filter(
+    const pinePrice = rsps.pairs.filter(
       (pair) =>
         pair.pairAddress === "0x0E4B3d3141608Ebc730EE225666Fd97c833d553E"
     )[0].priceUsd;
 
     const formatedData = {
-      pinePrice: _pinePrice,
+      pinePrice: pinePrice,
       totalTVL: 0,
       totalPendingPine: 0,
       totalLiquidity: 0,
