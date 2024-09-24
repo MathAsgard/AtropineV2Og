@@ -144,7 +144,7 @@ const farms = [
     token: tokens.stable,
     quoteToken: tokens.pine,
     version: "2",
-    farmActive: false,
+    farmActive: true,
   },
 ];
 
