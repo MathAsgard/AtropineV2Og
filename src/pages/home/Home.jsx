@@ -26,7 +26,7 @@ const Home = () => {
   let [pendingPineUSD, setPendingPineUSD] = useState(0);
   let [userPine, setUserPine] = useState(0);
   let [userPineUSD, setUserPineUSD] = useState(0);
-  let [farmsToHarvest, setFarmsToHarvest] = useState(0);
+  let [farmsToHarvest, setFarmsToHarvest] = useState([]);
   let [farmsToHarvestLength, setFarmsToHarvestLength] = useState(0);
 
   const userAccount = useAccount({
@@ -45,7 +45,7 @@ const Home = () => {
 
     farms.forEach((farm) => {
       const lpContract = {
-        address: farm.lpAddress,
+        address: farm?.lpAddress,
         abi: lpABI,
       };
       calls.push({
@@ -62,6 +62,11 @@ const Home = () => {
         functionName: "pendingPine",
         args: [farm.pid, userAccount.address],
       });
+      calls.push({
+        ...contracts.pineToken,
+        functionName: "balanceOf",
+        args: [farm.lpAddress],
+      });
     });
 
     const farmAddressesFormated = farms.map((farm) => farm.lpAddress).join(",");
@@ -69,17 +74,19 @@ const Home = () => {
     const response = await fetch(
       `https://api.dexscreener.com/latest/dex/pairs/pulsechain/${farmAddressesFormated}`
     );
+
     const rsps = await response.json();
 
     const data = await multicall({ contracts: calls });
 
-    const pinePrice = rsps.pairs.filter(
-      (pair) =>
-        pair.pairAddress === "0x0E4B3d3141608Ebc730EE225666Fd97c833d553E"
-    )[0].priceUsd;
+    const _pinePrice =
+      rsps.pairs.filter(
+        (pair) =>
+          pair.pairAddress === "0x0E4B3d3141608Ebc730EE225666Fd97c833d553E"
+      )[0]?.priceUsd || 0;
 
     const formatedData = {
-      pinePrice: pinePrice,
+      pinePrice: _pinePrice,
       totalTVL: 0,
       totalPendingPine: 0,
       totalLiquidity: 0,
@@ -88,16 +95,27 @@ const Home = () => {
     };
 
     farms.forEach((farm, i) => {
-      const dxData = rsps.pairs.filter(
-        (pair) => pair.pairAddress === farm.lpAddress
-      )[0];
+      const dxData =
+        rsps.pairs.find((pair) => pair.pairAddress === farm.lpAddress) || {};
+
       const pid = farm.pid;
-      const totalSupply = Number(data[i * 3].result) / 1e18;
-      const masterchefBalance = Number(data[i * 3 + 1].result) / 1e18;
-      const pineToHarvest = Number(data[i * 3 + 2].result) / 1e18;
-      const liquidity = dxData.liquidity.usd;
-      const lpPrice = liquidity / totalSupply;
+      const pairPineBalance = Number(data[i * 4 + 3]?.result) / 1e18 || 0;
+      const totalSupply = Number(data[i * 4]?.result) / 1e18 || 0;
+      const masterchefBalance = Number(data[i * 4 + 1]?.result) / 1e18 || 0;
+      const pineToHarvest = Number(data[i * 4 + 2]?.result) / 1e18 || 0;
+      const liquidity = dxData?.liquidity?.usd || 0;
+      let lpPrice = 0;
+      if (dxData?.liquidity) {
+        lpPrice =
+          Number(dxData.liquidity.usd) / (Number(data[i * 4]?.result) / 1e18);
+      } else {
+        lpPrice =
+          (pairPineBalance * _pinePrice * 2) /
+          (Number(data[i * 4]?.result) / 1e18);
+      }
+
       const farmTVL = lpPrice * masterchefBalance;
+
       formatedData.lpData[farm.lpAddress] = {
         totalSupply,
         masterchefBalance,
@@ -106,6 +124,7 @@ const Home = () => {
         farmTVL,
         pineToHarvest,
       };
+
       formatedData.totalTVL += farmTVL;
       formatedData.totalLiquidity += liquidity;
       formatedData.totalPendingPine += pineToHarvest;
@@ -141,7 +160,7 @@ const Home = () => {
         {
           ...contracts.pineToken,
           functionName: "balanceOf",
-          args: [userAccount.address],
+          args: [userAccount?.address],
         },
         {
           ...contracts.pineToken,
@@ -299,8 +318,8 @@ const Home = () => {
                 <iframe
                   scrolling="no"
                   frameBorder={0}
-                  allowTransparency="true"
-                  allowFullScreen="true"
+                  allowtransparency="true"
+                  allowFullScreen={true}
                   style={{
                     position: "static",
                     visibility: "visible",

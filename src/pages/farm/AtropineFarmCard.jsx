@@ -91,7 +91,7 @@ const AtropineFarmCard = ({
     );
     const rsps = await response.json();
 
-    console.log("*****", rsps, farm);
+    console.log("*****", rsps, "farm:", farm);
 
     const pinePrice = rsps.pairs.filter(
       (pair) =>
@@ -100,6 +100,7 @@ const AtropineFarmCard = ({
     const pairData = rsps.pairs.filter(
       (pair) => pair.pairAddress === farm.lpAddress
     )[0];
+
     const [
       poolInfo,
       allowance,
@@ -252,7 +253,7 @@ const AtropineFarmCard = ({
         Number(pinePerBlock.result) / 1e18
       ),
     });
-    console.log(farm.lpSymbol, _lpPrice);
+    // console.log(farm.lpSymbol, _lpPrice);
     const _apr = Number(
       getFarmApy(
         _poolWeight,
@@ -338,7 +339,7 @@ const AtropineFarmCard = ({
     const { hash } = await writeContract({
       ...contracts.masterChef,
       functionName: "withdraw",
-      account: userAccount.address,
+      account: userAccount?.address,
       args: [farm.pid, _value],
     });
     getStats();

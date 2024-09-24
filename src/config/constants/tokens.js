@@ -129,32 +129,32 @@ const tokens = {
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     decimals: 18,
   },
-    usdt: {
+  usdt: {
     symbol: "pUSDT",
     address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     decimals: 18,
   },
-    weth: {
+  weth: {
     symbol: "pWETH",
     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     decimals: 18,
   },
-    bear: {
+  bear: {
     symbol: "bear",
     address: "0xd6c31bA0754C4383A41c0e9DF042C62b5e918f6d",
     decimals: 18,
   },
-    down: {
-    symbol: "dOWN",
+  down: {
+    symbol: "DOWN",
     address: "0x2556F7f8d82EbcdD7b821b0981C38D9dA9439CdD",
     decimals: 18,
   },
-    tsfi: {
+  tsfi: {
     symbol: "TSFI",
     address: "0x4243568Fa2bbad327ee36e06c16824cAd8B37819",
     decimals: 18,
   },
-    stable: {
+  stable: {
     symbol: "STABLE-LP",
     address: "0xC607606C0DC9B084D4e4458449963a975a762093",
     decimals: 18,
