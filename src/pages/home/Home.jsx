@@ -329,7 +329,7 @@ const Home = () => {
                     flexGrow: 1,
                   }}
                   title="Twitter Timeline"
-                  src="https://dexscreener.com/pulsechain/0x0e4b3d3141608ebc730ee225666fd97c833d553e"
+                  src="https://www.dextools.io/app/en/pulse/pair-explorer/0x0e4b3d3141608ebc730ee225666fd97c833d553e?t=1727194688982"
                 />
               </div>
             </div>
