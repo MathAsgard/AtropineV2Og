@@ -153,7 +153,7 @@ const farms = [
     token: tokens.pbal,
     quoteToken: tokens.pine,
     version: "2",
-    farmActive: true,
+    farmActive: false,
   },
     {
     pid: 18,
@@ -162,7 +162,7 @@ const farms = [
     token: tokens.phex,
     quoteToken: tokens.pine,
     version: "2",
-    farmActive: true,
+    farmActive: false,
   },
     {
     pid: 19,
@@ -171,7 +171,7 @@ const farms = [
     token: tokens.pcrv,
     quoteToken: tokens.pine,
     version: "2",
-    farmActive: true,
+    farmActive: false,
   },
 ];
 
