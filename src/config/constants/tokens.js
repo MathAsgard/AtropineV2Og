@@ -159,6 +159,21 @@ const tokens = {
     address: "0xC607606C0DC9B084D4e4458449963a975a762093",
     decimals: 18,
   },
+    pbal: {
+    symbol: "pBAL",
+    address: "0xba100000625a3754423978a60c9317c58a424e3D",
+    decimals: 18,
+  },
+      phex: {
+    symbol: "pHEX",
+    address: "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+    decimals: 18,
+  },
+    pcrv: {
+    symbol: "pCRV",
+    address: "0xD533a949740bb3306d119CC777fa900bA034cd52",
+    decimals: 18,
+  },
 };
 
 export default tokens;
