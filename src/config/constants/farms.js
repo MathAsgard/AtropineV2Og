@@ -146,6 +146,33 @@ const farms = [
     version: "2",
     farmActive: true,
   },
+    {
+    pid: 17,
+    lpSymbol: "PINE-pBAL",
+    lpAddress: "0xa51e20880876d56459f49ad3250b1b4da2371be9",
+    token: tokens.pbal,
+    quoteToken: tokens.pine,
+    version: "2",
+    farmActive: true,
+  },
+    {
+    pid: 18,
+    lpSymbol: "PINE-pHEX",
+    lpAddress: "0x4e848c2d48ee1e25b4d69ebff566377b5ad3e035",
+    token: tokens.phex,
+    quoteToken: tokens.pine,
+    version: "2",
+    farmActive: true,
+  },
+    {
+    pid: 19,
+    lpSymbol: "PINE-pCRV",
+    lpAddress: "0x3ee183908c0a9ad3093d354159504b887c3acd9a",
+    token: tokens.pcrv,
+    quoteToken: tokens.pine,
+    version: "2",
+    farmActive: true,
+  },
 ];
 
 export default farms;
